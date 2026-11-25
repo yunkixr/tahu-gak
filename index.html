@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="id" data-build="app">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#FFF8ED">
+  <meta name="description" content="tahu gak? Kuis pengetahuan umum harian dengan streak, XP, dan liga mingguan.">
+  <title>tahu gak?</title>
+  <link rel="icon" type="image/png" href="icons/favicon-64.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="tahu gak?">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=Parisienne&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Filter bersama untuk ilustrasi: garis tinta goyah & tepi cat air -->
+  <svg class="svg-defs" width="0" height="0" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="ink" x="-5%" y="-5%" width="110%" height="110%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="3" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="wash" x="-12%" y="-12%" width="124%" height="124%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="8" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G" result="d"/>
+        <feGaussianBlur in="d" stdDeviation="0.7" result="b"/>
+        <feComponentTransfer in="b"><feFuncA type="linear" slope="0.88"/></feComponentTransfer>
+      </filter>
+    </defs>
+  </svg>
+  <div id="splash" class="splash" role="status">
+    <div class="logo-bubble xl"><span>tahu gak?</span></div>
+    <p>Menyiapkan soal…</p>
+  </div>
+
+  <div class="app">
+    <aside class="rail">
+      <a class="logo-bubble" href="#home" aria-label="tahu gak? Beranda"><span>tahu gak?</span></a>
+      <nav id="rail-nav" class="rail-nav" aria-label="Navigasi utama"></nav>
+      <p class="rail-foot">Sedikit demi sedikit, tiap hari.</p>
+    </aside>
+    <div class="col">
+      <header class="topbar">
+        <a class="logo-bubble sm mobile-only" href="#home" aria-label="tahu gak? Beranda"><span>tahu gak?</span></a>
+        <div id="top-stats" class="top-stats"></div>
+      </header>
+      <main id="main" tabindex="-1"></main>
+    </div>
+  </div>
+  <nav id="bottom-nav" class="bottom-nav" aria-label="Navigasi utama"></nav>
+
+  <div id="onboard" class="onboard"></div>
+  <div id="quiz-layer" class="quiz-layer" hidden></div>
+  <div id="studio-layer" class="studio-layer" hidden></div>
+  <div id="modals"></div>
+  <div id="toasts" class="toasts" aria-live="polite"></div>
+
+  <noscript><p style="padding:2rem;font-family:sans-serif">tahu gak? membutuhkan JavaScript untuk berjalan.</p></noscript>
+  <script type="module" src="js/app.js"></script>
+  <script>
+    // Simpan aplikasi untuk dipakai offline.
+    if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  </script>
+</body>
+</html>
