@@ -41,7 +41,7 @@ export const appOfflineText = () => (APP_HAS_SERVER
 
 /** Keterangan akun saat terhubung, sesuai versi (claude.ai atau aplikasi). */
 export const onlineAccountText = () => (isFirebase()
-  ? L('Terhubung ke server tahu gak?. Progresmu dicadangkan online untuk HP ini; menghapus data aplikasi akan memutus progresmu.', 'Connected to the tahu gak? server. Your progress is backed up online for this phone; clearing the app\'s data will disconnect it.')
+  ? L('Terhubung ke server. Progresmu dicadangkan online untuk HP ini; menghapus data aplikasi akan memutus progresmu.', 'Connected to the tahu gak? server. Your progress is backed up online for this phone; clearing the app\'s data will disconnect it.')
   : L('Masuk dengan akun claude.ai. Progresmu tersimpan di akunmu.', 'Signed in with claude.ai. Your progress is saved to your account.'));
 
 const status = { mode: 'local', reason: 'none', uid: null, canWrite: false };
