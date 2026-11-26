@@ -208,6 +208,16 @@ body.onboarding .app, body.onboarding .bottom-nav { display: none; }
 .banner p { flex: 1; }
 .banner-sun { background: var(--gold-50); border-color: #E8D3A6; }
 .banner-fresh { background: var(--blush-50); border-color: var(--rose); }
+.banner-install { background: var(--paper); border-color: var(--rose); flex-wrap: wrap; }
+.banner-install p { min-width: 180px; }
+.install-steps { margin: 4px 0 2px; padding-left: 1.3em; display: grid; gap: 8px; text-align: left; line-height: 1.45; }
+.install-steps li::marker { font-weight: 700; color: var(--rose-deep, #C98299); }
+.inline-ico { display: inline-flex; width: 1.35em; height: 1.35em; vertical-align: -0.3em; }
+.inline-ico .ico, .inline-ico svg { width: 100%; height: 100%; }
+.install-url { word-break: break-all; font-weight: 600; user-select: all; }
+.invite-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line, #E8DCE0); flex-wrap: wrap; }
+.invite-row p { flex: 1; min-width: 160px; margin: 0; }
+.board-empty .btn { margin-top: 10px; }
 .banner-red { background: var(--blush-50); border-color: var(--rose); }
 
 .empty { text-align: center; padding: 44px 22px; display: grid; justify-items: center; gap: 10px; background: var(--paper); border: 1px dashed var(--line-2); border-radius: var(--r-card); }

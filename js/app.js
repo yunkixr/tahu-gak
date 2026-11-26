@@ -19,6 +19,7 @@ import { todayKey } from './core/dates.js';
 import { tickReminder } from './core/reminders.js';
 import { syncPush, pushActive } from './core/pushReminder.js';
 import { tickFunFact } from './core/funfact.js';
+import { initInstall, onInstallChange } from './core/install.js';
 import { initCloud, schedulePush, pushNow, getPlayers, onPlayers, cloudStatus, accountName, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, onlineAccountText } from './core/cloud.js';
 import { FIREBASE_CONFIG } from './firebase-config.js';
 import { QUESTION_BY_ID } from './data/questions.js';
@@ -326,6 +327,13 @@ function tick() {
     if (!pushActive(s)) tickReminder(s, (day) => update((st) => { st.settings.reminders.lastNotified = day; }, { silent: true }));
     tickFunFact(getState(), (day) => update((st) => { st.settings.funFact.lastNotified = day; }, { silent: true }));
   }
+}
+
+// ───────────── Pasang aplikasi ─────────────
+// Didaftarkan sedini mungkin: beforeinstallprompt bisa muncul sebelum boot selesai.
+if (IS_APP_BUILD) {
+  initInstall();
+  onInstallChange(() => { if (getState().profile.onboarded && route === 'home' && !quizOpen) render(); });
 }
 
 // ───────────── Boot ─────────────

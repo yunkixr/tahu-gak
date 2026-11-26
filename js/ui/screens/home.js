@@ -22,6 +22,7 @@ import { freshPool } from '../../core/quiz.js';
 import { storyButton } from '../shareUi.js';
 import { dailySpec } from '../storyCard.js';
 import { sectionTitle } from '../components.js';
+import { installBanner } from '../installUi.js';
 
 export function renderHome(s, ctx) {
   const today = todayKey();
@@ -83,6 +84,7 @@ export function renderHome(s, ctx) {
       : h('div.banner.banner-sun', art(ICON.crown()), h('p', L('Kamu main tanpa akun, jadi tidak masuk Leaderboard dan progres hanya tersimpan di browser ini.', 'You\'re playing without an account, so you\'re not on the Leaderboard and progress is saved in this browser only.')),
         h('div.row-gap', later, signInLink('a.btn.btn-primary.btn-sm'))));
   }
+  if (IS_APP_BUILD) { const ib = installBanner(s, ctx); if (ib) banners.push(ib); }
   const fresh = freshPool(s, today);
   if (fresh.length) {
     const cats = [...new Set(fresh.map((q) => q.category))].map((c) => CATEGORY_BY_ID[c].name);

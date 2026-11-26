@@ -39,6 +39,7 @@ export function defaultState() {
       reminders: { enabled: false, time: '19:00', lastNotified: null, push: false }, // push: notifikasi HP lewat server (versi aplikasi)
       funFact: { enabled: false, time: '08:00', lastNotified: null }, // fun fact harian (lihat core/funfact.js)
       lbBannerHidden: false,
+      installHidden: false, // banner "Pasang aplikasi" di Beranda (versi aplikasi)
       lang: 'id',           // 'id' | 'en' (lihat core/i18n.js)
     },
     league: { tier: 0, weekKey: null, lastResult: null },

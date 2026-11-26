@@ -1,4 +1,5 @@
 import { art, lamp, letter, medal, ICON, iconEl } from '../art.js';
+import { inviteButton } from '../installUi.js';
 import { h, fmt, clear } from '../dom.js';
 import { button, chip, emptyState, entityAvatar } from '../components.js';
 import { standings, TIERS, ZONE, SIM_FRIENDS, simFriendStats } from '../../core/league.js';
@@ -178,7 +179,8 @@ function friendsView(s, ctx) {
             onClick: () => ctx.update((st) => { if (!st.friends.real.includes(p.id)) st.friends.real.push(p.id); }) })));
       }
     }
-    addReal = h('section.card.add-friend', h('h3', L('Tambah teman', 'Add friends')), h('p.small.muted', L('Cari orang yang bisa membuka aplikasi ini. Skor mereka tampil setelah mereka bermain.', 'Search for people who can open this app. Their scores appear once they\'ve played.')), input, results);
+    addReal = h('section.card.add-friend', h('h3', L('Tambah teman', 'Add friends')), h('p.small.muted', L('Cari orang yang bisa membuka aplikasi ini. Skor mereka tampil setelah mereka bermain.', 'Search for people who can open this app. Their scores appear once they\'ve played.')), input, results,
+      IS_APP_BUILD ? h('div.invite-row', h('p.small.muted', L('Temanmu belum pakai tahu gak? Kirimi link-nya.', 'Friends not on tahu gak? yet? Send them the link.')), inviteButton(s)) : null);
   } else {
     addReal = h('section.card.add-friend', h('h3', L('Tambah teman asli', 'Add real friends')),
       h('p.small.muted', IS_APP_BUILD ? appOfflineText() : L('Butuh mode online: buka aplikasi ini lewat claude.ai dan masuk ke akunmu. Di mode lokal, kamu bisa menambah pemain simulasi di bawah untuk perbandingan.', 'This needs online mode: open the app through claude.ai and sign in. In local mode you can add simulated players below to compare against.')));

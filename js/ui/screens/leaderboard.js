@@ -4,7 +4,8 @@ import { art, medal, catArt, ICON } from '../art.js';
 import { h, fmt, clear } from '../dom.js';
 import { button, chip, toggle, openCountryModal, countryPicker, entityAvatar } from '../components.js';
 import { PERIODS, buildBoard, sanitizeRows } from '../../core/leaderboard.js';
-import { cloudStatus } from '../../core/cloud.js';
+import { cloudStatus, IS_APP_BUILD } from '../../core/cloud.js';
+import { inviteButton } from '../installUi.js';
 import { flag, countryName } from '../../data/countries.js';
 import { nextUtcWeekStart, nextUtcMonthStart, formatLocalDateTime } from '../../core/dates.js';
 import { L } from '../../core/i18n.js';
@@ -115,7 +116,8 @@ export function renderBoard(s, ctx) {
 
   const empty = entries.length <= 1
     ? h('div.board-empty', h('p', h('strong', me ? L(`Baru kamu yang tercatat di ${boardName} ${where} ${periodWord}.`, `So far it's just you on ${boardName} ${where} ${periodWord}.`) : L(`Belum ada pemain di ${boardName} ${where} ${periodWord}.`, `No players on ${boardName} ${where} ${periodWord} yet.`))),
-      h('p.small.muted', online ? L('Bagikan aplikasi ini ke temanmu supaya papan ini makin ramai.', 'Share the app with friends to liven up this board.') : L('Aktifkan pemain simulasi untuk melihat contoh papan yang ramai.', 'Turn on simulated players to see a busy example board.')))
+      h('p.small.muted', online ? L('Bagikan aplikasi ini ke temanmu supaya papan ini makin ramai.', 'Share the app with friends to liven up this board.') : L('Aktifkan pemain simulasi untuk melihat contoh papan yang ramai.', 'Turn on simulated players to see a busy example board.')),
+      online && IS_APP_BUILD ? inviteButton(s, { variant: 'primary' }) : null)
     : null;
 
   return h('div.board-wrap', head, summary, extras, h('p.small.muted.note', modeNote),

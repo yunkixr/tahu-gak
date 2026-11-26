@@ -1,5 +1,5 @@
 // tahu gak? — service worker: aplikasi tetap jalan tanpa internet, dan menerima notifikasi streak.
-const VERSION = 'tahugak-20261126-2157-11f0b25e';
+const VERSION = 'tahugak-20261126-2233-e53853f4';
 const FILES = [
   "./",
   "css/styles.css",
@@ -25,6 +25,7 @@ const FILES = [
   "js/core/firebaseShim.js",
   "js/core/funfact.js",
   "js/core/i18n.js",
+  "js/core/install.js",
   "js/core/kilat.js",
   "js/core/leaderboard.js",
   "js/core/league.js",
@@ -78,6 +79,7 @@ const FILES = [
   "js/ui/components.js",
   "js/ui/dom.js",
   "js/ui/icons.js",
+  "js/ui/installUi.js",
   "js/ui/leaderboardJoin.js",
   "js/ui/screens/achievements.js",
   "js/ui/screens/home.js",
