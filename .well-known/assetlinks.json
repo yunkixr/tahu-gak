@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "app.web.tahu_gak.twa",
+      "sha256_cert_fingerprints": [
+        "B5:F4:46:44:8A:79:E5:CB:E4:0D:46:2F:0D:B8:B2:CC:B6:60:11:30:85:79:46:3E:87:37:46:55:58:EB:2F:9F"
+      ]
+    }
+  }
+]
