@@ -13,6 +13,7 @@ import { formatKey, diffDays } from '../../core/dates.js';
 import { calendar } from '../calendar.js';
 import { ICON, art, rose, letter, catArt, iconEl, rankArt } from '../art.js';
 import { notificationSupport, requestPermission, sendNotification } from '../../core/reminders.js';
+import { pushSupported, enablePush, disablePush } from '../../core/pushReminder.js';
 import { sendFactNotification } from '../../core/funfact.js';
 import { cloudStatus, IS_APP_BUILD, APP_HAS_SERVER, appOfflineText, onlineAccountText, isFirebase } from '../../core/cloud.js';
 import { storageAvailable } from '../../core/storage.js';
@@ -170,8 +171,29 @@ function settings(s, ctx) {
     denied: L('Notifikasi diblokir oleh browser atau halaman ini. Pengingat akan tampil sebagai banner di Beranda.', 'Notifications are blocked by the browser or this page. Reminders will show as a banner on Home.'),
     unsupported: L('Browser ini tidak mendukung notifikasi. Pengingat akan tampil sebagai banner di Beranda.', 'This browser doesn\'t support notifications. Reminders will show as a banner on Home.'),
   }[perm];
+  const usePush = pushSupported();
+  const pushText = r.enabled && r.push
+    ? L('Notifikasi streak dikirim ke HP-mu pada jam pilihanmu kalau kamu belum main, walaupun aplikasi sedang ditutup.', 'A streak notification is sent to your phone at your chosen time if you haven\'t played, even when the app is closed.')
+    : L('Nyalakan untuk dapat notifikasi streak di HP, walaupun aplikasi sedang ditutup. Butuh internet.', 'Turn on to get streak notifications on your phone, even when the app is closed. Needs internet.');
+
+  const onPushReminder = async (on) => {
+    ctx.update((st) => { st.settings.reminders.enabled = on; if (!on) st.settings.reminders.push = false; });
+    if (!on) { await disablePush(ctx.getState()); return; }
+    const res = await enablePush(ctx.getState());
+    ctx.update((st) => { st.settings.reminders.push = res === 'ok'; });
+    const msg = {
+      ok: L(`Notifikasi streak aktif pukul ${r.time}.`, `Streak notifications on at ${r.time}.`),
+      denied: L('Izin notifikasi ditolak. Izinkan notifikasi untuk tahu gak? di pengaturan HP, lalu coba lagi.', 'Notification permission was denied. Allow notifications for tahu gak? in your phone settings, then try again.'),
+      offline: L('Butuh internet untuk menyalakan notifikasi. Coba lagi saat online.', 'You need internet to turn on notifications. Try again when online.'),
+      nokey: L('Server notifikasi belum siap. Coba lagi beberapa saat lagi.', 'The notification server isn\'t ready yet. Try again in a little while.'),
+      error: L('Notifikasi belum bisa dinyalakan di HP ini. Pengingat tetap muncul saat aplikasi terbuka.', 'Notifications couldn\'t be turned on on this phone. Reminders still show while the app is open.'),
+      unsupported: L('HP atau browser ini tidak mendukung notifikasi push. Pengingat tetap muncul saat aplikasi terbuka.', 'This phone or browser doesn\'t support push notifications. Reminders still show while the app is open.'),
+    }[res];
+    toast(msg, { tone: res === 'ok' ? 'ok' : 'plain', duration: res === 'ok' ? 3000 : 5000 });
+  };
 
   const onReminder = async (on) => {
+    if (usePush) return onPushReminder(on);
     let p = notificationSupport();
     if (on && p === 'default') p = await requestPermission();
     ctx.update((st) => { st.settings.reminders.enabled = on; });
@@ -205,7 +227,7 @@ function settings(s, ctx) {
       langToggle(s.settings.lang, (lang) => ctx.update((st) => { st.settings.lang = lang; }))),
     h('div.set-row', h('div', h('strong', L('Mode timer', 'Timer mode')), h('p.small.muted', L('Bonus XP untuk jawaban cepat. Di tantangan harian, waktu habis tidak membuatmu salah.', 'Bonus XP for quick answers. In the daily challenge, running out of time doesn\'t count as wrong.'))),
       toggle(s.settings.timer, (v) => ctx.update((st) => { st.settings.timer = v; }), 'Timer')),
-    h('div.set-row', h('div', h('strong', L('Pengingat harian', 'Daily reminder')), h('p.small.muted', permText)),
+    h('div.set-row', h('div', h('strong', usePush ? L('Notifikasi streak', 'Streak notifications') : L('Pengingat harian', 'Daily reminder')), h('p.small.muted', usePush ? pushText : permText)),
       toggle(r.enabled, onReminder, L('Pengingat', 'Reminder'))),
     h('div.set-row', h('div', h('strong', L('Jam pengingat', 'Reminder time')), h('p.small.muted', L('Dikirim jika kamu belum main hari itu.', 'Sent if you haven\'t played that day.'))),
       h('div.row-gap', time, button(L('Tes', 'Test'), { variant: 'ghost', size: 'sm', disabled: !r.enabled, onClick: () => {

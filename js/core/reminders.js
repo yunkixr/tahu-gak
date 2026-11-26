@@ -35,6 +35,11 @@ export function reminderMessage(state) {
 export function sendNotification(state) {
   if (notificationSupport() !== 'granted') return false;
   const { title, body } = reminderMessage(state);
+  // Di HP (Android Chrome) notifikasi harus lewat service worker; dipakai bila aplikasi punya SW.
+  if (typeof navigator !== 'undefined' && navigator.serviceWorker?.controller) {
+    navigator.serviceWorker.ready.then((r) => r.showNotification(title, { body, tag: 'tahugak-daily', icon: 'icons/icon-192.png', data: { url: './' } })).catch(() => {});
+    return true;
+  }
   try {
     const n = new Notification(title, { body, tag: 'tahugak-daily' });
     n.onclick = () => { window.focus(); n.close(); };

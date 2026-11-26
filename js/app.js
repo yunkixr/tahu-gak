@@ -17,6 +17,7 @@ import { renderReport } from './ui/screens/report.js';
 import { renderPath } from './ui/screens/path.js';
 import { todayKey } from './core/dates.js';
 import { tickReminder } from './core/reminders.js';
+import { syncPush, pushActive } from './core/pushReminder.js';
 import { tickFunFact } from './core/funfact.js';
 import { initCloud, schedulePush, pushNow, getPlayers, onPlayers, cloudStatus, accountName, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, onlineAccountText } from './core/cloud.js';
 import { FIREBASE_CONFIG } from './firebase-config.js';
@@ -322,7 +323,7 @@ function tick() {
   }
   const s = getState();
   if (s.profile.onboarded) {
-    tickReminder(s, (day) => update((st) => { st.settings.reminders.lastNotified = day; }, { silent: true }));
+    if (!pushActive(s)) tickReminder(s, (day) => update((st) => { st.settings.reminders.lastNotified = day; }, { silent: true }));
     tickFunFact(getState(), (day) => update((st) => { st.settings.funFact.lastNotified = day; }, { silent: true }));
   }
 }
@@ -340,7 +341,7 @@ async function boot() {
       replaceState(cloud, { silent: true });
       if (local.profile.onboarded) toast(L('Progres dimuat dari akunmu.', 'Progress loaded from your account.'), { icon: '☁️' });
     }
-    onSaved((st) => schedulePush(st));
+    onSaved((st) => { schedulePush(st); syncPush(st); });
     if (cloudStatus().mode === 'cloud') pushNow(getState());
     subscribe(() => { if (!quizOpen) render(); });
     onPlayers((players) => {

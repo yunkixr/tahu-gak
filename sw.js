@@ -1,9 +1,10 @@
-// tahu gak? — service worker: aplikasi tetap jalan tanpa internet.
-const VERSION = 'tahugak-20261125-1318-fa0fd1d2';
+// tahu gak? — service worker: aplikasi tetap jalan tanpa internet, dan menerima notifikasi streak.
+const VERSION = 'tahugak-20261126-0836-26d3b231';
 const FILES = [
   "./",
   "css/styles.css",
   "icons/apple-touch-icon.png",
+  "icons/badge-96.png",
   "icons/favicon-64.png",
   "icons/icon-192.png",
   "icons/icon-512.png",
@@ -30,6 +31,7 @@ const FILES = [
   "js/core/milestones.js",
   "js/core/missions.js",
   "js/core/path.js",
+  "js/core/pushReminder.js",
   "js/core/quiz.js",
   "js/core/reminders.js",
   "js/core/report.js",
@@ -125,5 +127,28 @@ self.addEventListener('fetch', (e) => {
     const hit = await c.match(req, { ignoreSearch: true }) || (req.mode === 'navigate' ? await c.match('index.html') : null);
     const net = fetch(req).then((res) => { if (res.ok) c.put(req, res.clone()); return res; }).catch(() => null);
     return hit || (await net) || new Response('Offline', { status: 503 });
+  }));
+});
+
+// Notifikasi push pengingat streak (dikirim GitHub Action, lihat .github/scripts/streak-reminder.mjs).
+self.addEventListener('push', (e) => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil(self.registration.showNotification(d.title || 'tahu gak?', {
+    body: d.body || '',
+    tag: d.tag || 'tahugak-streak',
+    renotify: true,
+    icon: 'icons/icon-192.png',
+    badge: 'icons/badge-96.png',
+    data: { url: d.url || './' },
+  }));
+});
+
+self.addEventListener('notificationclick', (e) => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((list) => {
+    for (const c of list) if (c.url.startsWith(self.registration.scope) && 'focus' in c) return c.focus();
+    return self.clients.openWindow(url);
   }));
 });

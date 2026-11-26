@@ -1,0 +1,36 @@
+name: Pengingat streak
+
+on:
+  schedule:
+    - cron: '7 * * * *'   # tiap jam (menit ke-7); GitHub bisa terlambat beberapa menit
+  workflow_dispatch: {}   # bisa dijalankan manual dari tab Actions
+
+permissions:
+  contents: read
+
+concurrency:
+  group: streak-reminder
+  cancel-in-progress: false
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Kirim notifikasi
+        working-directory: .github/scripts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ -z "$FIREBASE_SERVICE_ACCOUNT" ]; then
+            echo "Secret FIREBASE_SERVICE_ACCOUNT belum diisi, dilewati."
+            exit 0
+          fi
+          npm install --no-save --no-audit --no-fund firebase-admin@12 web-push@3
+          node streak-reminder.mjs

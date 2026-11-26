@@ -63,7 +63,7 @@ export async function installFirebase(config) {
           const s = await F.getDoc(ref(path));
           return { exists: s.exists(), data: () => s.data() };
         },
-        set: (data) => F.setDoc(ref(path), clean(data)),
+        set: (data, opts) => F.setDoc(ref(path), clean(data), opts?.merge ? { merge: true } : {}),
       }),
       collection: (name) => ({
         onSnapshot: (next, onError) => F.onSnapshot(F.collection(fs, name), (snap) => {
