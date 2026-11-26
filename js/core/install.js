@@ -25,6 +25,7 @@ const ua = () => (typeof navigator !== 'undefined' ? navigator.userAgent || '' :
 export const isIOS = () => /iPhone|iPad|iPod/i.test(ua()) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 // Browser bawaan aplikasi lain (Instagram, Facebook, LINE, TikTok, WebView Android) tidak bisa memasang PWA.
 export const isInAppBrowser = () => /FBAN|FBAV|Instagram|\bLine\/|TikTok|musical_ly|; wv\)/i.test(ua());
+export const isAndroid = () => /Android/i.test(ua());
 const isIOSSafari = () => isIOS() && /Safari/i.test(ua()) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua()) && !isInAppBrowser();
 
 /** 'installed' | 'prompt' | 'ios' | 'ios-other' | 'inapp' | 'manual' */
@@ -47,6 +48,11 @@ export async function promptInstall() {
     if (choice?.outcome === 'accepted') installedNow = true;
     return choice?.outcome || 'dismissed';
   } catch { return 'unavailable'; } finally { notify(); }
+}
+
+/** Link APK Android (TWA dari PWABuilder) di folder yang sama dengan aplikasi. */
+export function apkUrl() {
+  try { return new URL('tahu-gak.apk', appUrl()).href; } catch { return 'tahu-gak.apk'; }
 }
 
 /** Link aplikasi yang dibagikan: alamat saat ini tanpa hash/query. */

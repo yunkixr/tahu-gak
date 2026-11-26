@@ -3,7 +3,7 @@ import { h } from './dom.js';
 import { button, modal, toast } from './components.js';
 import { ICON, art, iconEl } from './art.js';
 import { L } from '../core/i18n.js';
-import { installMode, promptInstall, appUrl } from '../core/install.js';
+import { installMode, promptInstall, appUrl, apkUrl, isAndroid } from '../core/install.js';
 
 function steps(items) {
   return h('ol.install-steps', items.map((it) => h('li', ...[].concat(it))));
@@ -48,6 +48,14 @@ export function installBanner(s, ctx) {
   const mode = installMode();
   if (mode === 'installed' || s.settings.installHidden) return null;
   const later = button(L('Nanti', 'Later'), { size: 'sm', variant: 'ghost', onClick: () => ctx.update((st) => { st.settings.installHidden = true; }) });
+  if (isAndroid() && mode !== 'inapp') {
+    const apk = h('a.btn.btn-primary.btn-sm', { href: apkUrl(), download: 'tahu-gak.apk', onclick: () => {
+      toast(L('Setelah selesai diunduh, buka file-nya lalu ketuk Instal. Kalau diminta, izinkan pemasangan dari Chrome.', 'Once it has downloaded, open the file and tap Install. If asked, allow installs from Chrome.'), { duration: 7000 });
+    } }, h('span.btn-icon', { 'aria-hidden': 'true' }, iconEl('download')), h('span', L('Unduh APK', 'Download APK')));
+    return h('div.banner.banner-install', art(ICON.download()),
+      h('p', L('Pasang aplikasi tahu gak? di HP Android-mu biar bisa dibuka dari layar utama dan dapat notifikasi streak.', 'Install the tahu gak? app on your Android phone to open it from your home screen and get streak notifications.')),
+      h('div.row-gap', later, apk));
+  }
   const act = mode === 'prompt'
     ? button(L('Pasang', 'Install'), { size: 'sm', onClick: async () => {
       const r = await promptInstall();
@@ -69,13 +77,14 @@ function inviteText(s) {
 
 export async function shareInvite(s) {
   const url = appUrl();
-  const text = inviteText(s);
+  const text = `${inviteText(s)} ${L(`Pengguna Android bisa langsung pasang APK-nya: ${apkUrl()}`, `Android users can install the APK: ${apkUrl()}`)}`;
   if (navigator.share) {
     try { await navigator.share({ title: 'tahu gak?', text, url }); return; } catch (e) { if (e?.name === 'AbortError') return; }
   }
   const wa = `https://wa.me/?text=${encodeURIComponent(`${text}\n${url}`)}`;
   modal({ title: L('Ajak teman', 'Invite friends'), icon: ICON.send(),
-    body: h('div', h('p', L('Kirim link ini ke temanmu:', 'Send this link to your friends:')), h('p.install-url', url)),
+    body: h('div', h('p', L('Kirim link ini ke temanmu:', 'Send this link to your friends:')), h('p.install-url', url),
+      h('p.small.muted', L('APK untuk Android:', 'APK for Android:')), h('p.install-url', apkUrl())),
     actions: [
       { label: L('Tutup', 'Close'), variant: 'ghost' },
       { label: L('Kirim lewat WhatsApp', 'Send on WhatsApp'), onClick: () => window.open(wa, '_blank', 'noopener') },
