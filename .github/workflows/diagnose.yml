@@ -1,0 +1,22 @@
+# Manual: cek jumlah pemain/progres/langganan di Firestore (tanpa data pribadi di log).
+name: Cek data
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cek
+        working-directory: .github/scripts
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          npm install --no-audit --no-fund firebase-admin@12 >/dev/null 2>&1
+          node diagnose.mjs
