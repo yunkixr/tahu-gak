@@ -35,6 +35,19 @@ Setelah itu tahu gak? muncul dengan ikonnya sendiri, terbuka layar penuh, dan te
    Pastikan juga ada file kosong bernama `.nojekyll` di repository (buat dengan cara yang sama) supaya
    GitHub Pages mau menyajikan folder yang namanya diawali titik.
 
+## Notifikasi streak
+
+Kalau belum main sampai jam pengingat, HP dapat notifikasi walaupun aplikasi ditutup.
+Pengirimnya GitHub Action `Pengingat streak` (.github/workflows/streak-reminder.yml) yang jalan tiap jam, gratis.
+
+1. Firebase → Project settings → **Service accounts → Generate new private key** (file JSON terunduh).
+   File ini kunci utama proyekmu: jangan dibagikan ke siapa pun.
+2. Repo GitHub → **Settings → Secrets and variables → Actions → New repository secret**,
+   nama `FIREBASE_SERVICE_ACCOUNT`, isi dengan seluruh isi file JSON tadi.
+3. Tab **Actions → Pengingat streak → Run workflow** sekali (membuat kunci notifikasi otomatis).
+4. Di HP: install aplikasinya dulu, lalu **Profil → Notifikasi streak** → nyalakan → izinkan notifikasi.
+   iPhone: notifikasi hanya jalan dari aplikasi yang dipasang di Layar Utama (iOS 16.4 ke atas).
+
 ## Update
 
 Soal baru ditambahkan tiap hari di versi claude.ai. Versi aplikasi ini memakai bank soal saat zip dibuat;
