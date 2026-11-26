@@ -85,11 +85,12 @@ export async function installFirebase(config) {
         return out;
       },
       search: async (q) => {
+        // Kosong = tampilkan pemain terbaru, supaya teman langsung kelihatan tanpa mengetik.
         const t = String(q || '').trim().toLowerCase();
-        if (!t) return [];
         return players
-          .filter((p) => typeof p.nickname === 'string' && p.nickname.toLowerCase().includes(t))
-          .slice(0, 12)
+          .filter((p) => typeof p.nickname === 'string' && p.nickname.trim() && (!t || p.nickname.toLowerCase().includes(t)))
+          .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+          .slice(0, t ? 12 : 20)
           .map((p) => ({ id: p.id, name: p.nickname.slice(0, 24), avatarUrl: avatarUrl(p.avatarCfg), isMe: p.id === uid }));
       },
     };

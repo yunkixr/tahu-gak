@@ -1,5 +1,5 @@
 // tahu gak? — service worker: aplikasi tetap jalan tanpa internet, dan menerima notifikasi streak.
-const VERSION = 'tahugak-20261126-2303-131a621e';
+const VERSION = 'tahugak-20261126-2354-d45ae0d2';
 const FILES = [
   "./",
   "css/styles.css",

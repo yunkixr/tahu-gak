@@ -168,7 +168,12 @@ function friendsView(s, ctx) {
     async function run(q) {
       const hits = (await searchPeople(q)).filter((p) => !p.isMe);
       clear(results);
-      if (!hits.length) { if (q) results.append(h('li.small.muted', L('Tidak ada yang cocok.', 'No matches.'))); return; }
+      if (!hits.length) {
+        const msg = q ? L('Tidak ada yang cocok. Pastikan temanmu sudah membuka aplikasinya dan mengisi nama.', 'No matches. Make sure your friend has opened the app and entered a name.')
+          : (IS_APP_BUILD ? L('Belum ada pemain lain. Ajak temanmu dulu lewat tombol di bawah.', 'No other players yet. Invite your friends with the button below.') : '');
+        if (msg) results.append(h('li.small.muted', msg));
+        return;
+      }
       for (const p of hits) {
         const already = s.friends.real.includes(p.id);
         const played = players.some((x) => x.id === p.id);
