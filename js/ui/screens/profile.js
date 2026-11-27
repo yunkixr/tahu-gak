@@ -4,7 +4,8 @@ import { openAvatarStudio } from '../avatarStudio.js';
 import { sanitizeAvatar, avatarSvg, getItem, RARITY } from '../../core/avatar.js';
 import { levelInfo as lvInfo } from '../../core/xp.js';
 import { openJoin, openChangeCountry, leave, signInLink } from '../leaderboardJoin.js';
-import { accountName, hasAccount, isRanked } from '../../core/cloud.js';
+import { accountName, hasAccount, isRanked, usernamesSupported } from '../../core/cloud.js';
+import { openUsernameModal } from '../usernameUi.js';
 import { flag, countryName } from '../../data/countries.js';
 import { levelInfo, RANKS } from '../../core/xp.js';
 import { ACHIEVEMENTS } from '../../core/achievements.js';
@@ -158,7 +159,11 @@ function accountCard(s, ctx) {
       : h('div.set-row',
         h('div', h('strong', 'Leaderboard'), h('p.small.muted', L('Belum ikut. Kamu tetap bisa main semua mode dan berteman.', 'Not joined. You can still play every mode and add friends.'))),
         button(L('Ikut Leaderboard', 'Join'), { size: 'sm', onClick: () => openJoin(ctx) }));
-  return card('settings account', sectionTitle(L('Akun', 'Account')), h('div.set-row.col', h('strong', L('Status masuk', 'Sign-in status')), status), lbRow);
+  const unameRow = usernamesSupported() ? h('div.set-row',
+    h('div', h('strong', 'Username'),
+      s.profile.username ? h('p.small.uname-show', `@${s.profile.username}`) : h('p.small.muted', L('Belum ada. Temanmu mencarimu lewat username.', 'Not set yet. Friends find you by your username.'))),
+    button(s.profile.username ? L('Ubah', 'Change') : L('Buat username', 'Create username'), { size: 'sm', variant: s.profile.username ? 'ghost' : 'primary', onClick: () => openUsernameModal(ctx) })) : null;
+  return card('settings account', sectionTitle(L('Akun', 'Account')), h('div.set-row.col', h('strong', L('Status masuk', 'Sign-in status')), status), unameRow, lbRow);
 }
 
 // ───────────── Pengaturan ─────────────

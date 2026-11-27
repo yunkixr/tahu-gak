@@ -7,6 +7,7 @@
 // "Viewer"), aplikasi tetap berjalan penuh dengan localStorage saja.
 
 import { todayKey, addDays, utcWeekKey, utcMonthKey } from './dates.js';
+import { isValidUsername } from './username.js';
 import { levelInfo, rankedTotalXp } from './xp.js';
 import { weekXp } from './league.js';
 import { myScores, publicCatScores } from './leaderboard.js';
@@ -56,6 +57,23 @@ let lastPlayerJson = '';
 let lastProgressJson = '';
 
 export const cloudStatus = () => ({ ...status, reason: L(...REASONS[status.reason]) });
+// ───────────── Username unik (hanya backend Firebase versi aplikasi) ─────────────
+export const usernamesSupported = () => typeof window !== 'undefined' && !!window.claude?.usernames && status.mode === 'cloud';
+/** 'ok' | 'taken' | 'offline' | 'error' | 'unsupported' */
+export async function claimUsername(name) {
+  if (!usernamesSupported()) return 'unsupported';
+  return window.claude.usernames.claim(name);
+}
+export async function releaseUsername(name) {
+  if (usernamesSupported() && name) await window.claude.usernames.release(name);
+}
+/** uid pemilik, null kalau belum dipakai, undefined kalau tidak bisa dicek */
+export async function usernameOwner(name) {
+  if (!usernamesSupported()) return undefined;
+  return window.claude.usernames.get(name);
+}
+export const myUid = () => status.uid;
+
 export const getPlayers = () => players.filter((p) => p.id !== status.uid);
 export const onPlayers = (fn) => { playerListeners.add(fn); return () => playerListeners.delete(fn); };
 export const userApi = () => user;
@@ -132,6 +150,7 @@ export function playerRow(state) {
     monthKey: utcMonthKey(now),
     monthXp: scores.month,
     nickname: state.profile.name.slice(0, 24),
+    username: isValidUsername(state.profile.username) ? state.profile.username : null, // @handle unik untuk dicari teman
     avatarCfg: sanitizeAvatar(state.profile.avatarCfg), // hanya pilihan dari daftar, tanpa teks bebas
     totalXp: rankedTotalXp(state),                 // tanpa XP soal berpetunjuk (aturan Petunjuk)
     duels: status.mode === 'cloud' ? publicDuels(state) : [], // hasil duel yang sudah kamu mainkan (tanpa data pribadi)

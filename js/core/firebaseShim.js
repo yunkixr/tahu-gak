@@ -86,15 +86,42 @@ export async function installFirebase(config) {
       },
       search: async (q) => {
         // Kosong = tampilkan pemain terbaru, supaya teman langsung kelihatan tanpa mengetik.
-        const t = String(q || '').trim().toLowerCase();
+        // Cocok kalau nama mengandung teks, atau username diawali teks (boleh pakai @). Username persis di urutan pertama.
+        const raw = String(q || '').trim().toLowerCase();
+        const t = raw.replace(/^@+/, '');
+        const uname = (p) => (typeof p.username === 'string' ? p.username : '');
+        const rank = (p) => (t && uname(p) === t ? 0 : t && uname(p).startsWith(t) ? 1 : 2);
         return players
-          .filter((p) => typeof p.nickname === 'string' && p.nickname.trim() && (!t || p.nickname.toLowerCase().includes(t)))
-          .sort((a, b) => (b.updatedAt || 0) - (a.updatedAt || 0))
+          .filter((p) => typeof p.nickname === 'string' && p.nickname.trim()
+            && (!t || uname(p).startsWith(t) || (!raw.startsWith('@') && p.nickname.toLowerCase().includes(t))))
+          .sort((a, b) => rank(a) - rank(b) || (b.updatedAt || 0) - (a.updatedAt || 0))
           .slice(0, t ? 12 : 20)
-          .map((p) => ({ id: p.id, name: p.nickname.slice(0, 24), avatarUrl: avatarUrl(p.avatarCfg), isMe: p.id === uid }));
+          .map((p) => ({ id: p.id, name: p.nickname.slice(0, 24), username: uname(p) || null, avatarUrl: avatarUrl(p.avatarCfg), isMe: p.id === uid }));
       },
     };
-    window.claude = { use: async (name) => (name === 'db' ? db : name === 'user' ? user : null), backend: 'firebase' };
+    // Username unik: dokumen usernames/{nama} = { uid }. Aturan Firestore hanya mengizinkan membuat dokumen
+    // yang belum ada (tidak bisa ditimpa) dan menghapus milik sendiri.
+    const unameRef = (n) => F.doc(fs, `usernames/${n}`);
+    const usernames = {
+      get: async (n) => {
+        try { const s = await timeout(F.getDoc(unameRef(n)), 8000); return s ? (s.exists() ? (s.data()?.uid || null) : null) : undefined; }
+        catch { return undefined; } // undefined = tidak bisa dicek
+      },
+      claim: async (n) => {
+        try {
+          const ok = await timeout(F.setDoc(unameRef(n), { uid, at: Date.now() }).then(() => true), 10000);
+          if (ok) return 'ok';
+          return 'offline';
+        } catch {
+          const owner = await usernames.get(n);
+          if (owner === uid) return 'ok';
+          if (owner) return 'taken';
+          return 'error';
+        }
+      },
+      release: async (n) => { try { await timeout(F.deleteDoc(unameRef(n)), 8000); } catch { /* biarkan */ } },
+    };
+    window.claude = { use: async (name) => (name === 'db' ? db : name === 'user' ? user : null), backend: 'firebase', usernames };
     return true;
   } catch (e) {
     console.warn('[tahu gak] Firebase tidak tersedia', e);

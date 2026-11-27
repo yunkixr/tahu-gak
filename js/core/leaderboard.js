@@ -13,6 +13,7 @@
 // tetapi bukan pengganti validasi server-side untuk aplikasi produksi.
 
 import { utcWeekKey, utcMonthKey, utcDayKey, utcWeekFraction, utcMonthFraction, weekDays, dayNumber, daysInUtcMonth, keyFromDayNumber } from './dates.js';
+import { isValidUsername } from './username.js';
 import { seeded, unit } from './rng.js';
 import { isCountry } from '../data/countries.js';
 import { bi, L } from './i18n.js';
@@ -106,6 +107,7 @@ export function sanitizeRows(rows, now = new Date()) {
     if (badCatMap(r.catWeek, r.weekXp ?? 0) || badCatMap(r.catMonth, r.monthXp ?? 0) || badCatMap(r.catAll, r.totalXp)) reasons.push('XP kategori tidak valid');
     if (r.country != null && !isCountry(r.country)) reasons.push('kode negara tidak valid');
     if (typeof r.nickname !== 'string' || r.nickname.length > 24) reasons.push('nama tidak valid');
+    if (r.username != null && !isValidUsername(r.username)) reasons.push('username tidak valid');
     if (reasons.length) rejected.push({ id: r.id, reasons });
     else valid.push(r);
   }

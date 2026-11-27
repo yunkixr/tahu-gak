@@ -71,8 +71,9 @@ export function installBanner(s, ctx) {
 
 function inviteText(s) {
   const name = (s.profile.name || '').trim();
+  const handle = s.profile.username ? `@${s.profile.username}` : name;
   const base = L('Main kuis tahu gak? bareng aku. Tiap hari 5 soal, kita adu streak dan XP di Leaderboard.', 'Play the tahu gak? quiz with me. 5 questions a day, and we compete on streaks and XP on the Leaderboard.');
-  return name ? `${base} ${L(`Cari namaku di Teman: ${name}`, `Find me under Friends: ${name}`)}` : base;
+  return handle ? `${base} ${L(`Tambahkan aku di Teman: ${handle}`, `Add me under Friends: ${handle}`)}` : base;
 }
 
 export async function shareInvite(s) {

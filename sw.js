@@ -1,5 +1,5 @@
 // tahu gak? — service worker: aplikasi tetap jalan tanpa internet, dan menerima notifikasi streak.
-const VERSION = 'tahugak-20261127-1039-8058d107';
+const VERSION = 'tahugak-20261127-1337-fa077cce';
 const FILES = [
   "./",
   "css/styles.css",
@@ -42,6 +42,7 @@ const FILES = [
   "js/core/state.js",
   "js/core/storage.js",
   "js/core/streak.js",
+  "js/core/username.js",
   "js/core/xp.js",
   "js/data/answers.js",
   "js/data/bank/geografi.js",
@@ -96,6 +97,7 @@ const FILES = [
   "js/ui/screens/streak.js",
   "js/ui/shareUi.js",
   "js/ui/storyCard.js",
+  "js/ui/usernameUi.js",
   "manifest.webmanifest"
 ];
 

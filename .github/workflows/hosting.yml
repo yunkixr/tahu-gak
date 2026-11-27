@@ -33,5 +33,5 @@ jobs:
         run: |
           printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx --yes firebase-tools@13 deploy --only hosting --project tahu-gak --non-interactive
+          npx --yes firebase-tools@13 deploy --only hosting,firestore:rules --project tahu-gak --non-interactive
           rm -f "$RUNNER_TEMP/sa.json"

@@ -2,13 +2,14 @@
   "hosting": {
     "public": ".",
     "ignore": [
-      "firebase.json",
+      "**/node_modules/**",
+      "*.apk",
       ".git/**",
       ".github/**",
       ".nojekyll",
       "README.md",
-      "**/node_modules/**",
-      "*.apk"
+      "firebase.json",
+      "firestore.rules"
     ],
     "headers": [
       {
@@ -28,5 +29,8 @@
         "type": 302
       }
     ]
+  },
+  "firestore": {
+    "rules": "firestore.rules"
   }
 }

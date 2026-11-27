@@ -1,6 +1,7 @@
 // Store sederhana: satu objek state, diubah lewat update(fn), lalu disimpan & disiarkan.
 
 import { loadRaw, saveRaw, clearRaw } from './storage.js';
+import { isValidUsername } from './username.js';
 import { todayKey } from './dates.js';
 import { emptyPath } from './path.js';
 import { isCountry } from '../data/countries.js';
@@ -13,7 +14,7 @@ export function defaultState() {
   return {
     version: STATE_VERSION,
     meta: { createdAt: Date.now(), updatedAt: 0 },
-    profile: { name: '', avatarCfg: null, startDate: null, onboarded: false, country: null, leaderboard: false, wardrobe: { favs: [], recent: [], outfits: [null, null, null] } }, // country: ISO alpha-2 pilihan pemain; leaderboard: ikut Leaderboard (butuh akun claude.ai)
+    profile: { name: '', username: null, avatarCfg: null, startDate: null, onboarded: false, country: null, leaderboard: false, wardrobe: { favs: [], recent: [], outfits: [null, null, null] } }, // country: ISO alpha-2 pilihan pemain; leaderboard: ikut Leaderboard (butuh akun claude.ai)
     xp: { total: 0, balance: 0 },
     xpLog: {},
     xpLogUtc: {},
@@ -39,6 +40,7 @@ export function defaultState() {
       reminders: { enabled: false, time: '19:00', lastNotified: null, push: false }, // push: notifikasi HP lewat server (versi aplikasi)
       funFact: { enabled: false, time: '08:00', lastNotified: null }, // fun fact harian (lihat core/funfact.js)
       lbBannerHidden: false,
+      usernameBannerHidden: false,
       installHidden: false, // banner "Pasang aplikasi" di Beranda (versi aplikasi)
       lang: 'id',           // 'id' | 'en' (lihat core/i18n.js)
     },
@@ -97,6 +99,7 @@ export function migrate(raw) {
   delete merged.profile.phone;
   merged.profile.country = isCountry(merged.profile.country) ? merged.profile.country : null;
   merged.profile.leaderboard = merged.profile.leaderboard === true && !!merged.profile.country;
+  if (!isValidUsername(merged.profile.username)) merged.profile.username = null;
   if (merged.settings.phoneBannerHidden) merged.settings.lbBannerHidden = true;
   delete merged.settings.phoneBannerHidden;
   merged.version = STATE_VERSION;

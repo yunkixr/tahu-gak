@@ -1,11 +1,13 @@
 import { art, lamp, letter, medal, ICON, iconEl } from '../art.js';
+import { usernameBanner } from '../usernameUi.js';
+import { isValidUsername } from '../../core/username.js';
 import { inviteButton } from '../installUi.js';
 import { h, fmt, clear } from '../dom.js';
 import { button, chip, emptyState, entityAvatar } from '../components.js';
 import { standings, TIERS, ZONE, SIM_FRIENDS, simFriendStats } from '../../core/league.js';
 import { levelInfo } from '../../core/xp.js';
 import { formatDuration, todayKey, nextUtcWeekStart, formatLocalDateTime } from '../../core/dates.js';
-import { cloudStatus, resolveNames, searchPeople, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, appOfflineText } from '../../core/cloud.js';
+import { cloudStatus, resolveNames, searchPeople, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, appOfflineText, usernamesSupported } from '../../core/cloud.js';
 import { sanitizeRows } from '../../core/leaderboard.js';
 import { flag, countryName } from '../../data/countries.js';
 import { renderBoard } from './leaderboard.js';
@@ -123,14 +125,14 @@ function friendsView(s, ctx) {
   const players = ctx.players();
   const today = todayKey();
   const meRow = {
-    id: 'you', kind: 'you', name: s.profile.name || L('Kamu', 'You'), avatarCfg: s.profile.avatarCfg, country: s.profile.country,
+    id: 'you', kind: 'you', name: s.profile.name || L('Kamu', 'You'), username: s.profile.username, avatarCfg: s.profile.avatarCfg, country: s.profile.country,
     totalXp: s.xp.total, streak: s.streak.current, dailyScore: s.daily[today]?.score ?? null,
   };
   const simRows = s.friends.sim.map((id) => SIM_FRIENDS.find((f) => f.id === id)).filter(Boolean).map((f) => simFriendStats(f));
   const realRows = s.friends.real.map((id) => {
     const p = players.find((x) => x.id === id);
     return {
-      id, kind: 'real', name: p?.nickname || L('Pemain', 'Player'), avatarCfg: p?.avatarCfg, country: p?.country,
+      id, kind: 'real', name: p?.nickname || L('Pemain', 'Player'), username: isValidUsername(p?.username) ? p.username : null, avatarCfg: p?.avatarCfg, country: p?.country,
       totalXp: p?.totalXp ?? 0, streak: p?.streak ?? 0, dailyScore: p?.dailyDate === today ? p.dailyScore : null, missing: !p,
     };
   });
@@ -143,7 +145,7 @@ function friendsView(s, ctx) {
     table.append(h(`li.p-row.kind-${r.kind}`,
       h('span.p-rank', i + 1),
       h('span.p-avatar', { 'aria-hidden': 'true' }, entityAvatar(r)),
-      h('span.p-who', r.country ? h('span.p-flag', { title: countryName(r.country) }, flag(r.country)) : null, nameEl, kindChip(r.kind), r.missing ? h('span.small.muted', L('belum main', 'hasn\'t played')) : null),
+      h('span.p-who', r.country ? h('span.p-flag', { title: countryName(r.country) }, flag(r.country)) : null, nameEl, r.username ? h('span.p-uname', `@${r.username}`) : null, kindChip(r.kind), r.missing ? h('span.small.muted', L('belum main', 'hasn\'t played')) : null),
       h('span.f-stats',
         h('span', { title: 'Total XP' }, `${fmt(r.totalXp)} XP`),
         h('span.f-streak', { title: 'Streak' }, iconEl('flame'), `${r.streak}`),
@@ -162,7 +164,7 @@ function friendsView(s, ctx) {
   if (cs.mode === 'cloud' || cs.mode === 'readonly') {
     const results = h('ul.search-results');
     const input = h('input.input', {
-      type: 'search', placeholder: L('Cari nama rekan…', 'Search by name…'), 'aria-label': L('Cari teman', 'Search friends'),
+      type: 'search', placeholder: usernamesSupported() ? L('Cari nama atau @username…', 'Search name or @username…') : L('Cari nama rekan…', 'Search by name…'), 'aria-label': L('Cari teman', 'Search friends'),
       onfocus: () => run(''), oninput: (e) => run(e.target.value),
     });
     async function run(q) {
@@ -179,12 +181,15 @@ function friendsView(s, ctx) {
         const played = players.some((x) => x.id === p.id);
         const img = h('img', { src: p.avatarUrl, alt: '' });
         const name = h('span'); name.textContent = p.name;
-        results.append(h('li.search-hit', img, h('span.grow', name, played ? null : h('span.small.muted.block', L('belum pernah main', 'hasn\'t played yet'))),
+        results.append(h('li.search-hit', img, h('span.grow', name, p.username ? h('span.small.muted.block.s-uname', `@${p.username}`) : null, played ? null : h('span.small.muted.block', L('belum pernah main', 'hasn\'t played yet'))),
           button(already ? L('Sudah teman', 'Already friends') : L('Tambah', 'Add'), { size: 'xs', variant: already ? 'ghost' : 'primary', disabled: already,
             onClick: () => ctx.update((st) => { if (!st.friends.real.includes(p.id)) st.friends.real.push(p.id); }) })));
       }
     }
-    addReal = h('section.card.add-friend', h('h3', L('Tambah teman', 'Add friends')), h('p.small.muted', L('Cari orang yang bisa membuka aplikasi ini. Skor mereka tampil setelah mereka bermain.', 'Search for people who can open this app. Their scores appear once they\'ve played.')), input, results,
+    const mine = !usernamesSupported() ? null : s.profile.username
+      ? h('p.small.uname-mine', L('Username-mu: ', 'Your username: '), h('strong', `@${s.profile.username}`), L('. Kasih tahu temanmu biar mereka bisa menambahkanmu.', '. Share it so friends can add you.'))
+      : usernameBanner(s, ctx, { dismissable: false });
+    addReal = h('section.card.add-friend', h('h3', L('Tambah teman', 'Add friends')), mine, h('p.small.muted', L('Cari orang yang bisa membuka aplikasi ini. Skor mereka tampil setelah mereka bermain.', 'Search for people who can open this app. Their scores appear once they\'ve played.')), input, results,
       IS_APP_BUILD ? h('div.invite-row', h('p.small.muted', L('Temanmu belum pakai tahu gak? Kirimi link-nya.', 'Friends not on tahu gak? yet? Send them the link.')), inviteButton(s)) : null);
   } else {
     addReal = h('section.card.add-friend', h('h3', L('Tambah teman asli', 'Add real friends')),

@@ -20,7 +20,9 @@ import { tickReminder } from './core/reminders.js';
 import { syncPush, pushActive } from './core/pushReminder.js';
 import { tickFunFact } from './core/funfact.js';
 import { initInstall, onInstallChange } from './core/install.js';
-import { initCloud, schedulePush, pushNow, getPlayers, onPlayers, cloudStatus, accountName, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, onlineAccountText } from './core/cloud.js';
+import { usernameField, problemText } from './ui/usernameUi.js';
+import { suggestUsername, usernameProblem } from './core/username.js';
+import { initCloud, schedulePush, pushNow, getPlayers, onPlayers, cloudStatus, accountName, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, onlineAccountText, usernamesSupported, claimUsername } from './core/cloud.js';
 import { FIREBASE_CONFIG } from './firebase-config.js';
 import { QUESTION_BY_ID } from './data/questions.js';
 import { renderHome } from './ui/screens/home.js';
@@ -201,6 +203,27 @@ function renderOnboarding() {
   remember();
   const input = h('input.input.big', { value: onbDraft?.name || '', type: 'text', placeholder: L('Nama panggilanmu', 'Your nickname'), maxlength: 24, 'aria-label': L('Nama panggilan', 'Nickname'), autocomplete: 'nickname', id: 'nick' });
   const err = h('p.small.err', { role: 'alert' });
+  // Username unik (versi aplikasi + server): diusulkan dari nama sampai pemain mengubahnya sendiri.
+  const unameSuffix = Math.random();
+  const ufield = usernamesSupported() ? usernameField({ initial: onbDraft?.username || '', id: 'uname', onInput: (v) => { onbDraft = { ...(onbDraft || {}), username: v }; } }) : null;
+  if (ufield) input.addEventListener('input', () => {
+    if (!ufield.touched() && !onbDraft?.username) ufield.setValue(input.value.trim().length >= 2 ? suggestUsername(input.value, () => unameSuffix) : '');
+  });
+  let claiming = false;
+  const withUsername = async (go) => {
+    if (!ufield) { go(null); return; }
+    const v = ufield.value();
+    const p = usernameProblem(v);
+    if (p) { ufield.showError(p); ufield.input.focus(); return; }
+    if (claiming) return;
+    claiming = true;
+    const r = await claimUsername(v);
+    claiming = false;
+    if (r === 'ok') { go(v); return; }
+    if (r === 'taken') { ufield.showError('taken'); ufield.input.focus(); return; }
+    toast(`${problemText(r)} ${L('Kamu bisa membuatnya nanti di Profil.', 'You can create one later in Profile.')}`, { duration: 6000 });
+    go(null);
+  };
   // Pemilih avatar cepat: cewek/cowok, acak, atau buka studio untuk detail.
   const avPreview = h('div.onb-av');
   const segBtns = h('div.segctl', { role: 'group', 'aria-label': L('Tipe badan', 'Body type') });
@@ -236,10 +259,11 @@ function renderOnboarding() {
     err.textContent = '';
     return name;
   };
-  const finish = (name, joinCountry) => {
+  const finish = (name, joinCountry, username = null) => {
     const finalAvatar = onbDraft?.avatar || avatar;
     onbDraft = null;
     completeOnboarding(name, finalAvatar, joinCountry);
+    if (username) update((st) => { st.profile.username = username; });
     maintenance(); // misi hari ini, dll.
     route = 'home';
     if (location.hash !== '#home') location.hash = 'home'; else render();
@@ -253,9 +277,9 @@ function renderOnboarding() {
     const name = checkName(); if (!name) return;
     if (!signedIn) { finish(name, null); return; }
     if (!isCountry(country)) { countryErr.textContent = L('Pilih negaramu dulu, atau pilih "Main tanpa Leaderboard".', 'Choose your country, or pick "Play without the Leaderboard".'); return; }
-    finish(name, country);
+    withUsername((u) => finish(name, country, u));
   };
-  const skip = () => { const name = checkName(); if (name) finish(name, null); };
+  const skip = () => { const name = checkName(); if (name) withUsername((u) => finish(name, null, u)); };
 
   const regBox = signedIn
     ? h('section.reg-box',
@@ -286,6 +310,9 @@ function renderOnboarding() {
     account,
     h('label.small', { for: 'nick' }, L('Siapa namamu?', 'What\'s your name?')),
     input, err,
+    ufield ? h('label.small', { for: 'uname' }, L('Username (untuk dicari teman)', 'Username (so friends can find you)')) : null,
+    ufield ? ufield.el : null,
+    ufield ? h('p.small.muted.uname-hint', L('Huruf kecil, angka, titik, atau garis bawah. Nama di atas tetap jadi nama tampilanmu.', 'Lowercase letters, numbers, dots, or underscores. The name above stays your display name.')) : null,
     h('p.small', L('Avatarmu', 'Your avatar')), grid,
     regBox,
     h('div.reg-actions', signedIn

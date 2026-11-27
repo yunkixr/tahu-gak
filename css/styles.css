@@ -1370,3 +1370,21 @@ html.reduce-motion .kilat-clock.low, html.reduce-motion .kilat-score.pop strong 
 .flag, .p-flag { display: inline-flex; align-items: center; justify-content: center; min-width: 1.9em; padding: 1px 5px; border-radius: 6px; border: 1px solid var(--line-2); background: var(--powder); color: var(--vintage); font: 700 .68rem/1.3 var(--sans); letter-spacing: .06em; vertical-align: .1em; }
 .my-rank-num .flag, .my-rank.other .my-rank-num { letter-spacing: .04em; }
 .tile-fav svg, .term-close svg { display: block; }
+
+/* ───────── Username (@handle) ───────── */
+.uname-field { display: grid; gap: 4px; }
+.uname-wrap { position: relative; display: flex; align-items: center; }
+.uname-at { position: absolute; left: 14px; color: var(--vintage); font-weight: 700; pointer-events: none; }
+.uname-wrap .uname-input { padding-left: 32px; font-weight: 600; letter-spacing: .01em; }
+.uname-note { min-height: 1.2em; margin: 0; color: var(--ink-soft, #7A6B6E); }
+.uname-note.ok { color: var(--sage-deep); font-weight: 600; }
+.uname-note.err { color: var(--rose-ink); font-weight: 600; }
+.uname-hint { margin-top: -2px; }
+.uname-form { display: grid; gap: 10px; text-align: left; }
+.uname-show, .uname-mine strong { color: var(--vintage); font-weight: 700; }
+.uname-mine { margin: 2px 0 10px; }
+.p-uname { font-size: .78rem; color: var(--vintage); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 9.5em; }
+.s-uname { color: var(--vintage); font-weight: 600; }
+.banner-uname { background: var(--blush-50); border-color: var(--rose); flex-wrap: wrap; }
+.banner-uname p { min-width: 180px; }
+.add-friend .banner-uname { margin: 4px 0 12px; }
