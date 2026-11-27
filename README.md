@@ -1,7 +1,7 @@
 # tahu gak? — versi aplikasi
 
 Kuis pengetahuan umum harian: tantangan 5 soal, streak, XP, Jalur Hafalan, Mode Kilat, dan kartu Story.
-Versi ini berdiri sendiri (tanpa claude.ai): bisa di-install di HP, punya ikon sendiri, dan jalan offline.
+Situs: https://tahu-gak.web.app (APK Android: https://tahu-gak.web.app/tahu-gak.apk). Bisa di-install di HP, punya ikon sendiri, dan jalan offline.
 Progres tersimpan di HP masing-masing. Kalau aplikasinya dibangun dengan Firebase (berkas `js/firebase-config.js` berisi
 konfigurasi), Leaderboard, teman, dan duel jalan antar pemain aplikasi ini saat online; kalau tidak, aplikasinya main solo.
 
@@ -50,6 +50,5 @@ Pengirimnya GitHub Action `Pengingat streak` (.github/workflows/streak-reminder.
 
 ## Update
 
-Soal baru ditambahkan tiap hari di versi claude.ai. Versi aplikasi ini memakai bank soal saat zip dibuat;
-untuk memperbarui, unggah ulang isi zip terbaru ke repository yang sama (aplikasi di HP ikut terbarui
-otomatis saat dibuka dengan internet). APK dari PWABuilder ikut terbarui juga, karena isinya diambil dari situs.
+Soal baru ditambahkan tiap hari ke repository ini. Situs di GitHub Pages dan tahu-gak.web.app ikut terbit otomatis,
+dan aplikasi di HP (termasuk APK) ikut terbarui saat dibuka dengan internet, karena isinya diambil dari situs.
