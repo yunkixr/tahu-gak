@@ -33,5 +33,17 @@ jobs:
         run: |
           printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
-          npx --yes firebase-tools@13 deploy --only hosting,firestore:rules --project tahu-gak --non-interactive
+          npx --yes firebase-tools@13 deploy --only hosting --project tahu-gak --non-interactive
+          rm -f "$RUNNER_TEMP/sa.json"
+      # Aturan Firestore: butuh peran "Firebase Rules Admin" untuk service account. Tanpa itu langkah ini
+      # dilewati (aturan ditempel manual di Firebase Console dari firestore.rules).
+      - name: Aturan Firestore
+        if: steps.chk.outputs.skip != '1'
+        continue-on-error: true
+        env:
+          SA: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          printf '%s' "$SA" > "$RUNNER_TEMP/sa.json"
+          export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/sa.json"
+          npx --yes firebase-tools@13 deploy --only firestore:rules --project tahu-gak --non-interactive || echo "Aturan Firestore tidak bisa diterbitkan otomatis (izin). Tempel firestore.rules di Firebase Console."
           rm -f "$RUNNER_TEMP/sa.json"
