@@ -19,7 +19,8 @@ import { todayKey } from './core/dates.js';
 import { tickReminder } from './core/reminders.js';
 import { syncPush, pushActive } from './core/pushReminder.js';
 import { tickFunFact } from './core/funfact.js';
-import { initInstall, onInstallChange } from './core/install.js';
+import { initInstall, onInstallChange, installMode } from './core/install.js';
+import { openInstallHelp } from './ui/installUi.js';
 import { usernameField, problemText } from './ui/usernameUi.js';
 import { suggestUsername, usernameProblem } from './core/username.js';
 import { initCloud, schedulePush, pushNow, getPlayers, onPlayers, cloudStatus, accountName, hasAccount, isRanked, IS_APP_BUILD, APP_HAS_SERVER, onlineAccountText, usernamesSupported, claimUsername } from './core/cloud.js';
@@ -308,6 +309,7 @@ function renderOnboarding() {
     h('h1.display', L('Lima soal sehari, makin tahu tiap hari.', 'Five questions a day, a little wiser every day.')),
     h('p.lead', L('Jawab tantangan harian, jaga streak, kumpulkan XP, dan ulang soal yang kamu salah sampai paham.', 'Answer the daily challenge, keep your streak, earn XP, and replay what you got wrong until it sticks.')),
     account,
+    iosNote(),
     h('label.small', { for: 'nick' }, L('Siapa namamu?', 'What\'s your name?')),
     input, err,
     ufield ? h('label.small', { for: 'uname' }, L('Username (untuk dicari teman)', 'Username (so friends can find you)')) : null,
@@ -354,6 +356,17 @@ function tick() {
     if (!pushActive(s)) tickReminder(s, (day) => update((st) => { st.settings.reminders.lastNotified = day; }, { silent: true }));
     tickFunFact(getState(), (day) => update((st) => { st.settings.funFact.lastNotified = day; }, { silent: true }));
   }
+}
+
+// iPhone/iPad: app di Layar Utama punya penyimpanan sendiri, terpisah dari Safari. Daftar dari Safari lalu memasang
+// app = akun baru. Jadi sarankan pasang dulu sebelum daftar.
+function iosNote() {
+  if (!IS_APP_BUILD) return null;
+  const mode = installMode();
+  if (mode !== 'ios' && mode !== 'ios-other') return null;
+  return h('div.onb-ios', h('p.small', h('strong', L('Pakai iPhone atau iPad? ', 'On an iPhone or iPad? ')),
+    L('Pasang tahu gak? ke Layar Utama dulu, baru daftar dari app-nya. Kalau daftar di Safari, akun dan progresmu tidak ikut pindah ke app.', 'Add tahu gak? to your Home Screen first, then sign up inside the app. If you sign up in Safari, your account and progress won\'t carry over to the app.')),
+  button(L('Caranya', 'How'), { size: 'sm', onClick: () => openInstallHelp(mode) }));
 }
 
 // ───────────── Pasang aplikasi ─────────────

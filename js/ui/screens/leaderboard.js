@@ -1,4 +1,5 @@
 import { art, medal, catArt, ICON } from '../art.js';
+import { SIMS_ENABLED } from '../../core/flags.js';
 // Papan peringkat Nasional & Global (tab "Peringkat" di halaman Liga, rute #peringkat).
 
 import { h, fmt, clear } from '../dom.js';
@@ -17,7 +18,7 @@ const LIST_LIMIT = 50;
 export function renderBoard(s, ctx) {
   const cs = cloudStatus();
   const online = cs.mode === 'cloud' || cs.mode === 'readonly';
-  const includeSim = s.leaderboard.showSim ?? !online;
+  const includeSim = SIMS_ENABLED && (s.leaderboard.showSim ?? !online);
   const country = ui.country || s.profile.country;
   const { valid, rejected } = sanitizeRows(ctx.players());
 
@@ -80,10 +81,11 @@ export function renderBoard(s, ctx) {
         openCountryModal({ title: L('Lihat peringkat negara', 'View a country\'s rankings'), value: country, confirmLabel: L('Lihat', 'View'), onPick: (c) => { ui.country = c; ctx.rerender(); } });
       },
     }) : null,
-    toggle(includeSim, (v) => ctx.update((st) => { st.leaderboard.showSim = v; }), L('Tampilkan pemain simulasi', 'Show simulated players')));
+    SIMS_ENABLED ? toggle(includeSim, (v) => ctx.update((st) => { st.leaderboard.showSim = v; }), L('Tampilkan pemain simulasi', 'Show simulated players')) : null);
 
   const modeNote = online
     ? L(`Pemain asli dari database aplikasi (${realCount} di papan ini).${includeSim ? ' Pemain berlabel "Simulasi" bukan orang sungguhan.' : ''}`, `Real players from the app's database (${realCount} on this board).${includeSim ? ' Players labeled "Simulated" are not real people.' : ''}`)
+    : !SIMS_ENABLED ? L('Belum terhubung ke server, jadi papan ini belum bisa dimuat. Cek internetmu.', 'Not connected to the server, so this board can\'t load yet. Check your internet.')
     : L(`Mode lokal: belum terhubung ke database, jadi belum ada pemain asli lain. ${includeSim ? 'Semua lawan di bawah adalah pemain simulasi, bukan orang sungguhan.' : 'Aktifkan pemain simulasi untuk mencoba papan ini.'}`, `Local mode: not connected to the database, so there are no other real players yet. ${includeSim ? 'Everyone below is a simulated player, not a real person.' : 'Turn on simulated players to try this board.'}`);
 
   // ── Podium & daftar
@@ -116,7 +118,7 @@ export function renderBoard(s, ctx) {
 
   const empty = entries.length <= 1
     ? h('div.board-empty', h('p', h('strong', me ? L(`Baru kamu yang tercatat di ${boardName} ${where} ${periodWord}.`, `So far it's just you on ${boardName} ${where} ${periodWord}.`) : L(`Belum ada pemain di ${boardName} ${where} ${periodWord}.`, `No players on ${boardName} ${where} ${periodWord} yet.`))),
-      h('p.small.muted', online ? L('Bagikan aplikasi ini ke temanmu supaya papan ini makin ramai.', 'Share the app with friends to liven up this board.') : L('Aktifkan pemain simulasi untuk melihat contoh papan yang ramai.', 'Turn on simulated players to see a busy example board.')),
+      h('p.small.muted', online || !SIMS_ENABLED ? L('Bagikan aplikasi ini ke temanmu supaya papan ini makin ramai.', 'Share the app with friends to liven up this board.') : L('Aktifkan pemain simulasi untuk melihat contoh papan yang ramai.', 'Turn on simulated players to see a busy example board.')),
       online && IS_APP_BUILD ? inviteButton(s, { variant: 'primary' }) : null)
     : null;
 

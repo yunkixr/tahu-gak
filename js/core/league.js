@@ -5,6 +5,7 @@
 // Pemain ASLI berasal dari database bersama (lihat cloud.js) bila tersedia.
 
 import { seeded, unit } from './rng.js';
+import { SIMS_ENABLED } from './flags.js';
 import { todayKey, weekDays, addDays, dayNumber, utcWeekKey, utcWeekFraction } from './dates.js';
 import { bi, L } from './i18n.js';
 import { rankedDayXp } from './xp.js';
@@ -76,7 +77,7 @@ export function standings(state, { realPlayers = [], now = new Date(), me = {} }
     .slice(0, GROUP_SIZE - 1)
     .map((p) => ({ id: p.id, name: p.nickname || 'Pemain', avatarCfg: p.avatarCfg, xp: p.weekXp, kind: 'real', country: p.country }));
   const frac = utcWeekFraction(now);
-  const bots = botsFor(wk, tier).slice(0, GROUP_SIZE - 1 - real.length).map((b) => ({ ...b, xp: botXpAt(b, frac) }));
+  const bots = SIMS_ENABLED ? botsFor(wk, tier).slice(0, GROUP_SIZE - 1 - real.length).map((b) => ({ ...b, xp: botXpAt(b, frac) })) : [];
   const you = { id: 'you', name: me.name || state.profile.name || L('Kamu', 'You'), avatarCfg: state.profile.avatarCfg, xp: weekXp(state, wk), kind: 'you', country: state.profile.country };
   const rows = [you, ...real, ...bots].sort((a, b) => b.xp - a.xp || (a.kind === 'you' ? -1 : b.kind === 'you' ? 1 : 0));
   return rows.map((r, i) => ({ ...r, rank: i + 1, zone: zoneFor(i + 1, rows.length, tier) }));
@@ -111,7 +112,7 @@ export function rolloverLeague(state, { now = new Date(), realPlayers = [], elig
     .map((p) => (p.weekKey === prev ? { ...p, xpThen: p.weekXp } : p.prevWeekKey === prev ? { ...p, xpThen: p.prevWeekXp } : null))
     .filter((p) => p && p.ranked === true && p.tier === tierBefore && p.xpThen > 0)
     .slice(0, GROUP_SIZE - 1);
-  const bots = botsFor(prev, tierBefore).slice(0, GROUP_SIZE - 1 - real.length);
+  const bots = SIMS_ENABLED ? botsFor(prev, tierBefore).slice(0, GROUP_SIZE - 1 - real.length) : [];
   const scores = [xp, ...real.map((p) => p.xpThen), ...bots.map((b) => botXpAt(b, 1))];
   const rank = 1 + scores.slice(1).filter((s) => s > xp).length;
   const zone = zoneFor(rank, scores.length, tierBefore);

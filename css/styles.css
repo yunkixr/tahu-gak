@@ -1388,3 +1388,21 @@ html.reduce-motion .kilat-clock.low, html.reduce-motion .kilat-score.pop strong 
 .banner-uname { background: var(--blush-50); border-color: var(--rose); flex-wrap: wrap; }
 .banner-uname p { min-width: 180px; }
 .add-friend .banner-uname { margin: 4px 0 12px; }
+
+/* ───────── Lancar di tablet & HP lama ─────────
+   Animasi hiasan yang berulang terus membuat layar digambar ulang tiap frame (termasuk ilustrasi bertekstur
+   tinta yang berat), sehingga terasa ngelag di layar besar. Sekarang tiap hiasan hanya bergerak beberapa kali
+   saat muncul, lalu diam. Animasi yang menjawab aksi pemain tidak berubah. */
+.flame-pill.is-lit .art-wrap,
+.flame.lit .art-wrap,
+.flame.big .art-wrap,
+.sh-flame:not(.dim) { animation-iteration-count: 3, 2; }
+.logo-bubble::after { animation-iteration-count: 2; }
+.sf-sun, .sf-cloud, .sf-birds, .lamp-glow, .dc-art, .twinkle { animation-iteration-count: 2; }
+.bar-fill::after { animation-iteration-count: 3; }
+.node.current { animation-iteration-count: 3; }
+.cal-cell.st-today .cal-day, .st-today .wday-dot { animation-iteration-count: 3; }
+.flame-pill:hover .art-wrap { animation-iteration-count: infinite; }
+.onb-ios { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 14px; margin: 4px 0 14px; border: 1px dashed var(--rose); border-radius: 14px; background: var(--blush-50); }
+.onb-ios p { flex: 1; min-width: 200px; margin: 0; }
+.uname-note:empty { display: none; }

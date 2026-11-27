@@ -2,6 +2,7 @@
 // Dipanggil dari mesin kuis, Kilat, duel, dan tombol bagikan lewat trackMission().
 
 import { CATEGORIES, CATEGORY_BY_ID } from '../data/categories.js';
+import { SIMS_ENABLED } from './flags.js';
 import { seeded, shuffle } from './rng.js';
 import { todayKey } from './dates.js';
 import { awardXp } from './xp.js';
@@ -26,9 +27,9 @@ const KINDS = {
 const ORDER = ['cat', 'correct', 'combo', 'kilat', 'duel', 'share', 'review', 'path', 'xp', 'daily'];
 
 /** Daftar misi untuk satu tanggal. `hasMistakes` menentukan apakah misi ulasan boleh muncul. */
-export function missionsFor(day, { hasMistakes = true } = {}) {
+export function missionsFor(day, { hasMistakes = true, canDuel = true } = {}) {
   const rand = seeded(`tahugak/missions/${day}`);
-  const kinds = shuffle(ORDER.filter((k) => hasMistakes || k !== 'review'), rand).slice(0, 3);
+  const kinds = shuffle(ORDER.filter((k) => (hasMistakes || k !== 'review') && (canDuel || k !== 'duel')), rand).slice(0, 3);
   const cats = CATEGORIES.filter((c) => c.id !== 'matematika');
   return kinds.map((kind) => {
     const m = { kind, target: KINDS[kind].target, progress: 0, done: false };
@@ -43,7 +44,9 @@ export const missionText = (m) => KINDS[m.kind]?.text(m) ?? '';
 export function ensureMissions(state, day = todayKey()) {
   if (!state.missions || state.missions.day !== day) {
     const hasMistakes = Object.values(state.mistakes || {}).filter((m) => !m.mastered).length >= 3;
-    state.missions = { day, list: missionsFor(day, { hasMistakes }), bonus: false, done: state.missions?.done || 0, bonusDays: state.missions?.bonusDays || 0 };
+    // Tanpa pemain simulasi (versi aplikasi), misi duel hanya muncul kalau sudah punya teman asli.
+    const canDuel = SIMS_ENABLED || (state.friends?.real?.length || 0) > 0;
+    state.missions = { day, list: missionsFor(day, { hasMistakes, canDuel }), bonus: false, done: state.missions?.done || 0, bonusDays: state.missions?.bonusDays || 0 };
   }
   return state.missions;
 }

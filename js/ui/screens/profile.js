@@ -1,4 +1,5 @@
 import { h, fmt } from '../dom.js';
+import { installMode } from '../../core/install.js';
 import { button, card, chip, progressBar, sectionTitle, badge, toggle, modal, confirmModal, toast, avatarEl, langToggle } from '../components.js';
 import { openAvatarStudio } from '../avatarStudio.js';
 import { sanitizeAvatar, avatarSvg, getItem, RARITY } from '../../core/avatar.js';
@@ -174,7 +175,9 @@ function settings(s, ctx) {
     granted: L('Notifikasi browser aktif. Pengingat dikirim selama aplikasi ini terbuka di sebuah tab.', 'Browser notifications are on. Reminders are sent while the app is open in a tab.'),
     default: L('Izin notifikasi belum diberikan. Aktifkan pengingat untuk meminta izin.', 'Notification permission isn\'t granted yet. Turn on reminders to ask for it.'),
     denied: L('Notifikasi diblokir oleh browser atau halaman ini. Pengingat akan tampil sebagai banner di Beranda.', 'Notifications are blocked by the browser or this page. Reminders will show as a banner on Home.'),
-    unsupported: L('Browser ini tidak mendukung notifikasi. Pengingat akan tampil sebagai banner di Beranda.', 'This browser doesn\'t support notifications. Reminders will show as a banner on Home.'),
+    unsupported: IS_APP_BUILD && (installMode() === 'ios' || installMode() === 'ios-other')
+      ? L('Di iPhone dan iPad, notifikasi baru bisa dinyalakan setelah tahu gak? dipasang ke Layar Utama (iOS 16.4 ke atas). Buka app-nya dari Layar Utama, lalu nyalakan lagi di sini.', 'On iPhone and iPad, notifications work once tahu gak? is added to the Home Screen (iOS 16.4 or later). Open it from the Home Screen, then turn this on again.')
+      : L('Browser ini tidak mendukung notifikasi. Pengingat akan tampil sebagai banner di Beranda.', 'This browser doesn\'t support notifications. Reminders will show as a banner on Home.'),
   }[perm];
   const usePush = pushSupported();
   const pushText = r.enabled && r.push

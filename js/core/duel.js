@@ -7,6 +7,7 @@
 // Lawan simulasi langsung "menjawab" secara deterministik (dan selalu berlabel simulasi).
 
 import { QUESTION_BY_ID, QUESTIONS, isReleased } from '../data/questions.js';
+import { SIMS_ENABLED } from './flags.js';
 import { CATEGORIES } from '../data/categories.js';
 import { seeded, shuffle, unit } from './rng.js';
 import { todayKey } from './dates.js';
@@ -174,7 +175,7 @@ export function syncDuels(state, players, myId, now = Date.now()) {
 
 /** Duel untuk ditampilkan: tantangan masuk dulu, lalu yang terbaru. */
 export function duelList(state) {
-  const all = Object.values(state.duels || {});
+  const all = Object.values(state.duels || {}).filter((d) => SIMS_ENABLED || d.kind !== 'sim');
   const incoming = all.filter((d) => d.role === 'to' && !d.me).sort((a, b) => b.at - a.at);
   const rest = all.filter((d) => !(d.role === 'to' && !d.me)).sort((a, b) => b.at - a.at).slice(0, 8);
   return { incoming, rest };

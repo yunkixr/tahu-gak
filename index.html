@@ -27,7 +27,7 @@
         <feDisplacementMap in="SourceGraphic" in2="n" scale="1.4" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
       <filter id="wash" x="-12%" y="-12%" width="124%" height="124%">
-        <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="3" seed="8" result="n"/>
+        <feTurbulence type="fractalNoise" baseFrequency="0.045" numOctaves="2" seed="8" result="n"/>
         <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G" result="d"/>
         <feGaussianBlur in="d" stdDeviation="0.7" result="b"/>
         <feComponentTransfer in="b"><feFuncA type="linear" slope="0.88"/></feComponentTransfer>

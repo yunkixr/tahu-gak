@@ -1,4 +1,5 @@
 import { art, lamp, letter, medal, ICON, iconEl } from '../art.js';
+import { SIMS_ENABLED } from '../../core/flags.js';
 import { usernameBanner } from '../usernameUi.js';
 import { isValidUsername } from '../../core/username.js';
 import { inviteButton } from '../installUi.js';
@@ -60,7 +61,7 @@ function lockedView(current, ctx) {
 
 function kindChip(kind) {
   if (kind === 'bot' || kind === 'sim') return chip(L('Simulasi', 'Simulated'), { tone: 'muted', title: L('Pemain simulasi, bukan orang sungguhan', 'A simulated player, not a real person') });
-  if (kind === 'real') return chip(L('Pemain asli', 'Real player'), { tone: 'mint' });
+  if (kind === 'real') return SIMS_ENABLED ? chip(L('Pemain asli', 'Real player'), { tone: 'mint' }) : null;
   return chip(L('Kamu', 'You'), { tone: 'cobalt' });
 }
 
@@ -97,8 +98,9 @@ function leagueView(s, ctx) {
   }
 
   const note = cs.mode === 'cloud'
-    ? L(`${realCount ? `${realCount} pemain asli di divisimu. ` : 'Belum ada pemain asli lain di divisimu minggu ini. '}Kursi kosong diisi pemain simulasi.`, `${realCount ? `${realCount} real ${realCount === 1 ? 'player' : 'players'} in your division. ` : 'No other real players in your division this week. '}Empty seats are filled by simulated players.`)
-    : IS_APP_BUILD ? L('Semua lawan di sini adalah pemain simulasi.', 'Every opponent here is simulated.') : L('Mode lokal: semua lawan di leaderboard mingguan ini adalah pemain simulasi. Buka aplikasi lewat claude.ai dan masuk untuk bertanding dengan pemain asli.', 'Local mode: every opponent on this weekly leaderboard is simulated. Open the app through claude.ai and sign in to compete with real players.');
+    ? !SIMS_ENABLED ? L(`${realCount ? `${realCount} pemain lain di divisimu minggu ini.` : 'Belum ada pemain lain di divisimu minggu ini. Ajak temanmu biar seru.'} Naik dan turun divisi berlaku kalau divisinya berisi minimal 8 pemain.`, `${realCount ? `${realCount} other ${realCount === 1 ? 'player' : 'players'} in your division this week.` : 'No other players in your division this week yet. Invite your friends.'} Moving up and down starts once a division has at least 8 players.`)
+    : L(`${realCount ? `${realCount} pemain asli di divisimu. ` : 'Belum ada pemain asli lain di divisimu minggu ini. '}Kursi kosong diisi pemain simulasi.`, `${realCount ? `${realCount} real ${realCount === 1 ? 'player' : 'players'} in your division. ` : 'No other real players in your division this week. '}Empty seats are filled by simulated players.`)
+    : IS_APP_BUILD ? appOfflineText() : L('Mode lokal: semua lawan di leaderboard mingguan ini adalah pemain simulasi. Buka aplikasi lewat claude.ai dan masuk untuk bertanding dengan pemain asli.', 'Local mode: every opponent on this weekly leaderboard is simulated. Open the app through claude.ai and sign in to compete with real players.');
 
   return h('div',
     resultBanner,
@@ -128,7 +130,7 @@ function friendsView(s, ctx) {
     id: 'you', kind: 'you', name: s.profile.name || L('Kamu', 'You'), username: s.profile.username, avatarCfg: s.profile.avatarCfg, country: s.profile.country,
     totalXp: s.xp.total, streak: s.streak.current, dailyScore: s.daily[today]?.score ?? null,
   };
-  const simRows = s.friends.sim.map((id) => SIM_FRIENDS.find((f) => f.id === id)).filter(Boolean).map((f) => simFriendStats(f));
+  const simRows = !SIMS_ENABLED ? [] : s.friends.sim.map((id) => SIM_FRIENDS.find((f) => f.id === id)).filter(Boolean).map((f) => simFriendStats(f));
   const realRows = s.friends.real.map((id) => {
     const p = players.find((x) => x.id === id);
     return {
@@ -197,7 +199,7 @@ function friendsView(s, ctx) {
   }
 
   const suggestions = SIM_FRIENDS.filter((f) => !s.friends.sim.includes(f.id));
-  const simAdd = suggestions.length ? h('section.card.add-friend',
+  const simAdd = SIMS_ENABLED && suggestions.length ? h('section.card.add-friend',
     h('h3', L('Pemain simulasi', 'Simulated players')),
     h('p.small.muted', L('Lawan latihan buatan aplikasi, bukan orang sungguhan. Statistiknya berubah setiap hari.', 'Practice opponents made by the app, not real people. Their stats change every day.')),
     h('div.sim-list', suggestions.map((f) => h('button.sim-chip', { type: 'button', onclick: () => ctx.update((st) => { st.friends.sim.push(f.id); }) },
