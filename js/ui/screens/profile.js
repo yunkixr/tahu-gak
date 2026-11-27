@@ -236,11 +236,12 @@ function settings(s, ctx) {
     h('div.set-row', h('div', h('strong', L('Mode timer', 'Timer mode')), h('p.small.muted', L('Bonus XP untuk jawaban cepat. Di tantangan harian, waktu habis tidak membuatmu salah.', 'Bonus XP for quick answers. In the daily challenge, running out of time doesn\'t count as wrong.'))),
       toggle(s.settings.timer, (v) => ctx.update((st) => { st.settings.timer = v; }), 'Timer')),
     h('div.set-row', h('div', h('strong', usePush ? L('Notifikasi streak', 'Streak notifications') : L('Pengingat harian', 'Daily reminder')), h('p.small.muted', usePush ? pushText : permText)),
-      toggle(r.enabled, onReminder, L('Pengingat', 'Reminder'))),
+      toggle(usePush ? r.enabled && r.push : r.enabled, onReminder, L('Pengingat', 'Reminder'))),
     h('div.set-row', h('div', h('strong', L('Jam pengingat', 'Reminder time')), h('p.small.muted', L('Dikirim jika kamu belum main hari itu.', 'Sent if you haven\'t played that day.'))),
-      h('div.row-gap', time, button(L('Tes', 'Test'), { variant: 'ghost', size: 'sm', disabled: !r.enabled, onClick: () => {
-        const ok = sendNotification(ctx.getState());
-        toast(ok ? L('Notifikasi tes dikirim.', 'Test notification sent.') : L('Notifikasi tidak bisa dikirim di sini. Pengingat akan muncul sebagai banner.', 'Notifications can\'t be sent here. Reminders will show as a banner.'), { icon: ok ? '🔔' : 'ℹ️' });
+      h('div.row-gap', time, button(L('Tes', 'Test'), { variant: 'ghost', size: 'sm', disabled: usePush ? !(r.enabled && r.push) : !r.enabled, onClick: () => {
+        const ok = sendNotification(ctx.getState(), { seed: Math.floor(Math.random() * 1e6) });
+        toast(ok && usePush ? L('Ini contoh notifikasinya. Yang asli dikirim server sekitar jam pilihanmu, kalau hari itu kamu belum main.', 'This is a preview. The real one comes from the server around your chosen time, if you haven\'t played that day.')
+          : ok ? L('Notifikasi tes dikirim.', 'Test notification sent.') : L('Notifikasi tidak bisa dikirim di sini. Pengingat akan muncul sebagai banner.', 'Notifications can\'t be sent here. Reminders will show as a banner.'), { icon: ok ? '🔔' : 'ℹ️' });
       } }))),
     h('div.set-row', h('div', h('strong', L('Fun fact harian', 'Daily fun fact')), h('p.small.muted', L('Satu fakta baru tiap hari sebagai notifikasi, selama app ini terbuka di sebuah tab. Faktanya juga selalu ada di Beranda.', 'One new fact a day as a notification, while the app is open in a tab. The fact is always on Home too.'))),
       toggle(ff.enabled, onFact, L('Fun fact harian', 'Daily fun fact'))),

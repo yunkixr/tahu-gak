@@ -2,8 +2,10 @@ name: Pengingat streak
 
 on:
   schedule:
-    - cron: '7 * * * *'   # tiap jam (menit ke-7); GitHub bisa terlambat beberapa menit
-  workflow_dispatch: {}   # bisa dijalankan manual dari tab Actions
+    # Cadangan saja: jadwal GitHub sering molor berjam-jam. Pemicu utama = cron-job.org memanggil
+    # workflow_dispatch tiap 15 menit (lihat README, bagian Notifikasi streak).
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}   # dipanggil cron-job.org, atau manual dari tab Actions
 
 permissions:
   contents: read
@@ -19,7 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          sparse-checkout: .github/scripts
+          sparse-checkout: |
+            .github/scripts
+            js/core/reminderText.js
       - uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -32,5 +36,6 @@ jobs:
             echo "Secret FIREBASE_SERVICE_ACCOUNT belum diisi, dilewati."
             exit 0
           fi
+          cp ../../js/core/reminderText.js ./reminderText.mjs
           npm install --no-save --no-audit --no-fund firebase-admin@12 web-push@3
           node streak-reminder.mjs

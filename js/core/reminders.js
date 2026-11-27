@@ -9,7 +9,8 @@
 
 import { todayKey } from './dates.js';
 import { playedToday } from './streak.js';
-import { L } from './i18n.js';
+import { getLang } from './i18n.js';
+import { streakMessage, textSeed } from './reminderText.js';
 
 export function notificationSupport() {
   if (typeof window === 'undefined' || !('Notification' in window)) return 'unsupported';
@@ -26,15 +27,15 @@ export async function requestPermission() {
   }
 }
 
-export function reminderMessage(state) {
+/** Teks pengingat (sama dengan yang dikirim server). `seed` acak dipakai tombol Tes supaya terlihat variasinya. */
+export function reminderMessage(state, seed = textSeed(todayKey())) {
   const n = state.streak.current;
-  if (n > 0) return { title: L(`Streak ${n} harimu menunggu!`, `Your ${n}-day streak is waiting!`), body: L('Selesaikan tantangan hari ini sebelum tengah malam.', 'Finish today\'s challenge before midnight.') };
-  return { title: L('Tahu gak? Ada 5 soal baru hari ini', 'tahu gak? 5 new questions today'), body: L('Mainkan tantangan harian dan mulai streak-mu.', 'Play the daily challenge and start your streak.') };
+  return streakMessage({ lang: getLang(), alive: n > 0 && !playedToday(state), streak: n, seed });
 }
 
-export function sendNotification(state) {
+export function sendNotification(state, { seed } = {}) {
   if (notificationSupport() !== 'granted') return false;
-  const { title, body } = reminderMessage(state);
+  const { title, body } = reminderMessage(state, seed);
   // Di HP (Android Chrome) notifikasi harus lewat service worker; dipakai bila aplikasi punya SW.
   if (typeof navigator !== 'undefined' && navigator.serviceWorker?.controller) {
     navigator.serviceWorker.ready.then((r) => r.showNotification(title, { body, tag: 'tahugak-daily', icon: 'icons/icon-192.png', data: { url: './' } })).catch(() => {});

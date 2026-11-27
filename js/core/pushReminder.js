@@ -100,5 +100,16 @@ export function syncPush(state) {
   }, 1500);
 }
 
+/**
+ * Dipanggil saat aplikasi dibuka: kalau pengingat menyala dan izin notifikasi sudah ada, pastikan HP ini benar-benar
+ * terdaftar di server (langganan bisa hilang/berubah, atau dulu gagal tersimpan). Tidak pernah memunculkan dialog izin.
+ * Mengembalikan hasil enablePush atau null kalau tidak perlu.
+ */
+export async function repairPush(state) {
+  if (!state.settings.reminders.enabled || !pushSupported() || !ready()) return null;
+  if (Notification.permission !== 'granted') return null;
+  return enablePush(state);
+}
+
 /** Pengingat lewat push aktif (pengingat lokal saat app terbuka tidak perlu lagi). */
 export const pushActive = (state) => !!state.settings.reminders.enabled && !!state.settings.reminders.push && pushSupported();

@@ -6,16 +6,9 @@
 const DAY = 86400000;
 const ymd = (ms) => new Date(ms).toISOString().slice(0, 10);
 
-const TEXT = {
-  id: {
-    alive: (n) => ({ title: `Streak ${n} harimu hampir putus`, body: 'Jawab 5 soal hari ini biar streak-mu tetap nyala.' }),
-    fresh: () => ({ title: 'Tantangan hari ini udah siap', body: '5 soal baru nunggu kamu. Yuk mulai streak lagi.' }),
-  },
-  en: {
-    alive: (n) => ({ title: `Your ${n}-day streak is about to break`, body: 'Answer today\'s 5 questions to keep it going.' }),
-    fresh: () => ({ title: 'Today\'s challenge is ready', body: '5 new questions are waiting. Start a new streak.' }),
-  },
-};
+// Teks notifikasi diambil dari aplikasi (js/core/reminderText.js), disalin ke sini oleh workflow sebelum jalan,
+// supaya isi notifikasi server sama dengan contoh di tombol Tes.
+import { streakMessage, textSeed } from './reminderText.mjs';
 
 /**
  * @param docs  [{ id, ...dataDokumen }]
@@ -38,8 +31,7 @@ export function planReminders(docs, now = new Date()) {
     if (d.lastDay === localDay) continue;        // sudah main hari ini
     const yesterday = ymd(localMs - DAY);
     const alive = d.lastDay === yesterday && (d.streak || 0) > 0; // streak masih bisa diselamatkan
-    const t = TEXT[d.lang === 'en' ? 'en' : 'id'];
-    const msg = alive ? t.alive(d.streak) : t.fresh();
+    const msg = streakMessage({ lang: d.lang, alive, streak: d.streak || 0, seed: textSeed(`${d.id}/${localDay}`) });
     out.push({ id: d.id, sub: d.sub, localDay, payload: { ...msg, tag: 'tahugak-streak', url: './' } });
   }
   return out;

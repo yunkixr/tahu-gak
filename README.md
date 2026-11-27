@@ -38,7 +38,8 @@ Setelah itu tahu gak? muncul dengan ikonnya sendiri, terbuka layar penuh, dan te
 ## Notifikasi streak
 
 Kalau belum main sampai jam pengingat, HP dapat notifikasi walaupun aplikasi ditutup.
-Pengirimnya GitHub Action `Pengingat streak` (.github/workflows/streak-reminder.yml) yang jalan tiap jam, gratis.
+Pengirimnya GitHub Action `Pengingat streak` (.github/workflows/streak-reminder.yml), gratis.
+Jadwal bawaan GitHub sering molor berjam-jam, jadi pemicu utamanya cron-job.org (langkah 5).
 
 1. Firebase → Project settings → **Service accounts → Generate new private key** (file JSON terunduh).
    File ini kunci utama proyekmu: jangan dibagikan ke siapa pun.
@@ -47,6 +48,16 @@ Pengirimnya GitHub Action `Pengingat streak` (.github/workflows/streak-reminder.
 3. Tab **Actions → Pengingat streak → Run workflow** sekali (membuat kunci notifikasi otomatis).
 4. Di HP: install aplikasinya dulu, lalu **Profil → Notifikasi streak** → nyalakan → izinkan notifikasi.
    iPhone: notifikasi hanya jalan dari aplikasi yang dipasang di Layar Utama (iOS 16.4 ke atas).
+5. Pemicu tepat waktu (gratis):
+   - GitHub → Settings → Developer settings → **Fine-grained tokens → Generate new token**.
+     Repository access: hanya `tahu-gak`. Permissions → Repository → **Actions: Read and write**. Simpan tokennya
+     (jangan dibagikan; token ini hanya bisa menjalankan workflow di repo ini).
+   - **cron-job.org** → daftar → **Create cronjob**:
+     - URL: `https://api.github.com/repos/yunkixr/tahu-gak/actions/workflows/streak-reminder.yml/dispatches`
+     - Jadwal: tiap 15 menit
+     - Advanced → Request method **POST**; headers `Authorization: Bearer <token>`,
+       `Accept: application/vnd.github+json`, `Content-Type: application/json`; request body `{"ref":"main"}`
+   - Tekan **Test run**: hasilnya harus `204`. Di tab Actions muncul run baru "Pengingat streak".
 
 ## Update
 

@@ -17,7 +17,7 @@ import { renderReport } from './ui/screens/report.js';
 import { renderPath } from './ui/screens/path.js';
 import { todayKey } from './core/dates.js';
 import { tickReminder } from './core/reminders.js';
-import { syncPush, pushActive } from './core/pushReminder.js';
+import { syncPush, pushActive, repairPush } from './core/pushReminder.js';
 import { tickFunFact } from './core/funfact.js';
 import { initInstall, onInstallChange, installMode } from './core/install.js';
 import { openInstallHelp } from './ui/installUi.js';
@@ -391,6 +391,11 @@ async function boot() {
     }
     onSaved((st) => { schedulePush(st); syncPush(st); });
     if (cloudStatus().mode === 'cloud') pushNow(getState());
+    if (getState().profile.onboarded) {
+      repairPush(getState()).then((res) => {
+        if (res && (res === 'ok') !== !!getState().settings.reminders.push) update((st) => { st.settings.reminders.push = res === 'ok'; });
+      }).catch(() => {});
+    }
     subscribe(() => { if (!quizOpen) render(); });
     onPlayers((players) => {
       // Duel: tantangan baru untukmu & balasan lawan.
